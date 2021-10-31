@@ -7,11 +7,13 @@ let addReimbursementButton = document.getElementById('addReimbursementButton');
 let loginButton = document.getElementById('loginButton');
 let currentUser = null;
 let confirmBtn = document.getElementById("approveDeny");
+let logoutBtn = document.getElementById("logout");
 
 confirmBtn.onclick = updateReimbursement;
 reimbursementButton.onclick = getReimbursements;
 // homeButton.onclick = getHomes;
 addReimbursementButton.onclick = addReimbursement;
+logoutBtn.onclick = logout;
 loginButton.onclick = () => {
     loginToApp().then(result => {
         currentUser = result;
@@ -21,6 +23,8 @@ loginButton.onclick = () => {
             reimbursementButton.style.display="inline";
             reimbursementButton.style.float="left"
             document.getElementById('checkbox').style.display="inline";
+            document.getElementById('approveForm').style.display='inline';
+            logoutBtn.style.display="inline";
         } else {
             reimbursementButton.innerText = "Get My Reimbursements"
             reimbursementButton.style.display="inline";
@@ -31,19 +35,23 @@ loginButton.onclick = () => {
 reimbursementButton.innerText = "Get Reimbursement Requests";
 homeButton.innerText = "See Homes";
 
+function logout() {
+    location.reload();
+}
 
 async function loginToApp() {
+    console.log("work?")
     let user = {
         username:document.getElementById("username").value,
         password:document.getElementById("password").value
     }
-
+    console.log("working?")
     let response = await fetch(URL+"login", {
         method:"POST",
         body:JSON.stringify(user),
         credentials:"include" //This will save the cookie when we receive it. 
     });
-
+    console.log("works")
     if(response.status===200) {
         document.getElementsByClassName("formClass")[0].innerHTML = '';
         buttonRow.appendChild(reimbursementButton);
@@ -52,6 +60,7 @@ async function loginToApp() {
         let result = await getCurrentUser(user.username);
         return result;
     } else {
+        console.log("nowork")
         let para = document.createElement("p");
         para.setAttribute("style", "color:red")
         para.innerText = "LOGIN FAILED"
@@ -107,10 +116,30 @@ function populateReimbursementsTableByUser(data){
             let row = document.createElement("tr");
             for(let cell in ticket){
                 let td = document.createElement("td");
-                if(cell!="author") {
+                if (cell!="author" && cell != "resolver" && cell != "statusID" && cell != "typeID") {
                     td.innerText=ticket[cell];
-                }else if(ticket[cell]) {
+                } else if (cell == "author") {
                     td.innerText = `${ticket[cell].userID}: ${ticket[cell].firstName} ${ticket[cell].lastName}`
+                } else if (cell == "resolver" && ticket[cell]) {
+                    td.innerText = `${ticket[cell].userID}: ${ticket[cell].firstName} ${ticket[cell].lastName}`
+                } else if (cell == "statusID") {
+                    if (ticket[cell] == 1) {
+                        td.innerText = "Pending"
+                    } else if (ticket[cell] == 2) {
+                        td.innerText = "Approved"
+                    } else {
+                        td.innerText = "Denied"
+                    }
+                } else {
+                    if (ticket[cell] == 1) {
+                        td.innerText = "Lodging"
+                    } else if (ticket[cell] == 2) {
+                        td.innerText = "Travel"
+                    } else if (ticket[cell] == 3) {
+                        td.innerText = "Food"
+                    } else {
+                        td.innerText = "Other"
+                    }
                 }
                 row.appendChild(td);
             }
@@ -166,7 +195,7 @@ function populateAllReimbursementsTable(data){
                 let row = document.createElement("tr");
                 for(let cell in ticket){
                     let td = document.createElement("td");
-                    if (cell!="author" || cell != "resolver" || cell != "statusID" || cell != "typeID") {
+                    if (cell!="author" && cell != "resolver" && cell != "statusID" && cell != "typeID") {
                         td.innerText=ticket[cell];
                     } else if (cell == "author") {
                         td.innerText = `${ticket[cell].userID}: ${ticket[cell].firstName} ${ticket[cell].lastName}`
