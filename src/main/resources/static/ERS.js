@@ -28,6 +28,7 @@ loginButton.onclick = () => {
         } else {
             reimbursementButton.innerText = "Get My Reimbursements"
             reimbursementButton.style.display="inline";
+            logoutBtn.style.display="inline";
         }
     }); 
 }
