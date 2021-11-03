@@ -2,7 +2,6 @@ const URL = "http://localhost:8081/";
 
 let buttonRow = document.getElementById("buttonRow");
 let reimbursementButton = document.getElementById('reimbursementBtn');
-// let homeButton = document.createElement("button");
 let addReimbursementButton = document.getElementById('addReimbursementButton');
 let loginButton = document.getElementById('loginButton');
 let currentUser = null;
@@ -11,7 +10,6 @@ let logoutBtn = document.getElementById("logout");
 
 confirmBtn.onclick = updateReimbursement;
 reimbursementButton.onclick = getReimbursements;
-// homeButton.onclick = getHomes;
 addReimbursementButton.onclick = addReimbursement;
 logoutBtn.onclick = logout;
 loginButton.onclick = () => {
@@ -34,7 +32,6 @@ loginButton.onclick = () => {
 }
 
 reimbursementButton.innerText = "Get Reimbursement Requests";
-homeButton.innerText = "See Homes";
 
 function logout() {
     location.reload();
@@ -57,7 +54,6 @@ async function loginToApp() {
         document.getElementsByClassName("formClass")[0].innerHTML = '';
         buttonRow.appendChild(reimbursementButton);
         document.getElementById('loggedInStuff').style.display="inline";
-        // buttonRow.appendChild(homeButton);
         let result = await getCurrentUser(user.username);
         return result;
     } else {
@@ -229,32 +225,6 @@ function populateAllReimbursementsTable(data){
     }
 }
 
-async function getHomes(){
-    let response = await fetch(URL+"homes", {credentials:"include"});
-    if(response.status===200){
-        let data = await response.json();
-        populateHomeTable(data);
-    }else{
-        console.log("Homes not available.");
-    }
-}
-
-function populateHomeTable(data){
-    let tbody = document.getElementById("homeBody");
-
-    tbody.innerHTML="";
-
-    for(let home of data){
-    let row = document.createElement("tr");
-    for(let cell in home){
-        let td = document.createElement("td");
-        td.innerText = home[cell];
-        row.appendChild(td);
-    }
-    tbody.appendChild(row);
-    }
-}
-
 function getNewReimbursement(){
     let newAmount = document.getElementById("reimbursementAmount").value;
     let newDescription = document.getElementById("description").value; 
@@ -321,5 +291,8 @@ async function getUpdatedReimbursement() {
         statusID: approve,
         author: author.author
     }
-    return reimbursement;
+    author.resolved = new Date().toISOString();
+    author.resolver = currentUser;
+    author.statusID = approve;
+    return author;
 }
